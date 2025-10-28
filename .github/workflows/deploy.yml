@@ -12,6 +12,6 @@ jobs:
       - name: Setup SSH key
         run: |
           echo "${{ secrets.CPANEL_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/contact_sks
           mkdir -p ~/.ssh/known_hosts
           echo "SSH key setup successful!"
