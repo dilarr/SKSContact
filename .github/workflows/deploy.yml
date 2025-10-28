@@ -1,4 +1,4 @@
-name: Test SSH Key Setup
+name: Test SSH Connection to cPanel
 
 on:
   push:
@@ -9,9 +9,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Setup SSH key
       - name: Setup SSH key
         run: |
-          echo "${{ secrets.CPANEL_SSH_PRIVATE_KEY }}" > ~/.ssh/contact_sks
-          chmod 600 ~/.ssh/contact_sks
-          mkdir -p ~/.ssh/known_hosts
-          echo "SSH key setup successful!"
+          mkdir -p $HOME/.ssh
+          printf "%s\n" "${{ secrets.CPANEL_SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.CPANEL_PORT }} -H ${{ secrets.CPANEL_HOST }} >> $HOME/.ssh/known_hosts
+          echo "SSH key setup completed!"
+
+      # 2️⃣ Test SSH connection
+      - name: Test SSH connection
+        run: |
+          ssh -i $HOME/.ssh/id_rsa -p ${{ secrets.CPANEL_PORT }} \
+              -o StrictHostKeyChecking=no \
+              ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} \
+              "echo 'SSH connection successful!'; whoami; pwd; ls -la"
