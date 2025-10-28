@@ -1,120 +1,17 @@
-name: Deploy to contact.sksdevelopers.lk via SSH
+name: Test SSH Key Setup
 
 on:
   push:
     branches:
-      - main   # Trigger the workflow when code is pushed to the 'main' branch
+      - main
 
 jobs:
-  deploy:
-    name: Deploy to cPanel (contact.sksdevelopers.lk)
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 2️⃣ Setup SSH key for secure connection
       - name: Setup SSH key
         run: |
-          mkdir -p ~/.ssh
           echo "${{ secrets.CPANEL_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p ${{ secrets.CPANEL_PORT }} -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
-
-      # 2.5️⃣ Test SSH connection
-      - name: Test SSH connection
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          script: |
-            echo "Testing SSH connection..."
-            echo "Current user: $(whoami)"
-            echo "Current directory: $(pwd)"
-            echo "Home directory contents:"
-            ls -la /home/${{ secrets.CPANEL_USERNAME }}/
-            echo "Checking if public_html exists:"
-            if [ -d "/home/${{ secrets.CPANEL_USERNAME }}/public_html" ]; then
-              echo "public_html directory exists"
-              ls -la /home/${{ secrets.CPANEL_USERNAME }}/public_html/
-            else
-              echo "public_html directory does not exist - creating it"
-              mkdir -p /home/${{ secrets.CPANEL_USERNAME }}/public_html
-            fi
-            echo "SSH connection test completed successfully!"
-
-      # 3️⃣ Deploy files to your cPanel account
-      - name: Deploy to cPanel
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          script: |
-            set -e  # Exit on any error
-            
-            echo "Starting deployment process..."
-            echo "Current directory: $(pwd)"
-            echo "User: $(whoami)"
-            
-            # Navigate to the public_html directory
-            echo "Navigating to public_html directory..."
-            cd /home/${{ secrets.CPANEL_USERNAME }}/public_html
-            echo "Current directory after cd: $(pwd)"
-            echo "Directory contents:"
-            ls -la
-            
-            # Create backup of current files (optional)
-            echo "Creating backup..."
-            if [ -d "backup" ]; then
-              echo "Removing old backup directory..."
-              rm -rf backup
-            fi
-            mkdir backup
-            echo "Copying current files to backup..."
-            cp -r * backup/ 2>/dev/null || echo "No files to backup or backup failed (this is OK)"
-            
-            # Remove old files (except backup directory)
-            echo "Removing old files..."
-            find . -maxdepth 1 -not -name 'backup' -not -name '.' -exec rm -rf {} \; 2>/dev/null || echo "No files to remove or removal failed (this is OK)"
-            
-            # Clone the repository
-            echo "Cloning repository..."
-            git clone https://github.com/${{ github.repository }}.git temp_deploy
-            
-            # Move files from temp_deploy to current directory
-            echo "Moving files to deployment directory..."
-            cp -r temp_deploy/* . 2>/dev/null || echo "Failed to copy some files"
-            cp -r temp_deploy/.* . 2>/dev/null || echo "Failed to copy hidden files (this is OK)"
-            
-            # Clean up temporary directory
-            echo "Cleaning up temporary directory..."
-            rm -rf temp_deploy
-            
-            # Set proper permissions
-            echo "Setting file permissions..."
-            chmod -R 755 . 2>/dev/null || echo "Failed to set directory permissions"
-            chmod 644 *.html *.css *.js *.png *.jpg *.jpeg *.gif *.ico 2>/dev/null || echo "Failed to set file permissions (this is OK)"
-            
-            echo "Final directory contents:"
-            ls -la
-            echo "Deployment completed successfully!"
-
-      # 4️⃣ Verify deployment
-      - name: Verify deployment
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          script: |
-            cd /home/${{ secrets.CPANEL_USERNAME }}/public_html
-            echo "Checking deployed files..."
-            ls -la
-            echo "Deployment verification completed!"
+          mkdir -p ~/.ssh/known_hosts
+          echo "SSH key setup successful!"
