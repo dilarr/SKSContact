@@ -1,4 +1,4 @@
-name: Test SSH Connection to cPanel
+name: Express Backend CI/CD to cPanel Subdomain
 
 on:
   push:
@@ -6,22 +6,70 @@ on:
       - main
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
-      # 1️⃣ Setup SSH key
-      - name: Setup SSH key
-        run: |
-          mkdir -p $HOME/.ssh
-          printf "%s\n" "${{ secrets.CPANEL_SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_rsa
-          chmod 600 $HOME/.ssh/id_rsa
-          ssh-keyscan -p ${{ secrets.CPANEL_PORT }} -H ${{ secrets.CPANEL_HOST }} >> $HOME/.ssh/known_hosts
-          echo "SSH key setup completed!"
 
-      # 2️⃣ Test SSH connection
-      - name: Test SSH connection
-        run: |
-          ssh -i $HOME/.ssh/id_rsa -p ${{ secrets.CPANEL_PORT }} \
-              -o StrictHostKeyChecking=no \
-              ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} \
-              "echo 'SSH connection successful!'; whoami; pwd; ls -la"
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Clean subdomain folder before deployment
+      - name: Clean Subdomain Folder
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script: |
+            rm -rf /home/sksdeve1/contact.sksdevelopers.lk/*
+
+      # 3️⃣ Upload project files to subdomain folder (exclude node_modules)
+      - name: Deploy Project Root to Subdomain
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          source: "."
+          target: "/home/sksdeve1/contact.sksdevelopers.lk "
+          strip_components: 0
+          exclude: |
+            .git/
+
+      # 4️⃣ Restart Node.js app by touching tmp/restart.txt
+      - name: Restart Node.js App
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script: |
+            cd /home/sksdeve1/contact.sksdevelopers.lk
+            mkdir -p tmp
+            touch tmp/restart.txt
+
+      # 5️⃣ Health check
+      - name: Health Check
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script: |
+            set -e
+            retries=5
+            count=0
+            until curl -f http://contact.sksdevelopers.lk:${{ secrets.BACKEND_PORT }}; do
+              count=$((count+1))
+              if [ $count -ge $retries ]; then
+                echo "Health check failed after $retries attempts."
+                exit 1
+              fi
+              echo "Retrying health check ($count/$retries)..."
+              sleep 5
+            done 
