@@ -1,0 +1,76 @@
+name: Deploy to contact.sksdevelopers.lk via SSH
+
+on:
+  push:
+    branches:
+      - main   # Trigger the workflow when code is pushed to the 'main' branch
+
+jobs:
+  deploy:
+    name: Deploy to cPanel (contact.sksdevelopers.lk)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup SSH key for secure connection
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CPANEL_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.CPANEL_PORT }} -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
+
+      # 3️⃣ Deploy files to your cPanel account
+      - name: Deploy to cPanel
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USERNAME }}
+          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script: |
+            # Navigate to the public_html directory
+            cd /home/${{ secrets.CPANEL_USERNAME }}/public_html
+            
+            # Create backup of current files (optional)
+            if [ -d "backup" ]; then
+              rm -rf backup
+            fi
+            mkdir backup
+            cp -r * backup/ 2>/dev/null || true
+            
+            # Remove old files (except backup directory)
+            find . -maxdepth 1 -not -name 'backup' -not -name '.' -exec rm -rf {} \;
+            
+            # Clone the repository
+            git clone https://github.com/${{ github.repository }}.git temp_deploy
+            
+            # Move files from temp_deploy to current directory
+            cp -r temp_deploy/* .
+            cp -r temp_deploy/.* . 2>/dev/null || true
+            
+            # Clean up temporary directory
+            rm -rf temp_deploy
+            
+            # Set proper permissions
+            chmod -R 755 .
+            chmod 644 *.html *.css *.js *.png *.jpg *.jpeg *.gif *.ico 2>/dev/null || true
+            
+            echo "Deployment completed successfully!"
+
+      # 4️⃣ Verify deployment
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USERNAME }}
+          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script: |
+            cd /home/${{ secrets.CPANEL_USERNAME }}/public_html
+            echo "Checking deployed files..."
+            ls -la
+            echo "Deployment verification completed!"
