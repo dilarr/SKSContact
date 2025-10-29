@@ -1,4 +1,4 @@
-name: Express Backend CI/CD to cPanel Subdomain
+name: Static Site Auto Deploy to cPanel
 
 on:
   push:
@@ -24,9 +24,10 @@ jobs:
           port: ${{ secrets.CPANEL_PORT }}
           script: |
             rm -rf /home/sksdeve1/contact.sksdevelopers.lk/*
+            mkdir -p /home/sksdeve1/contact.sksdevelopers.lk
 
-      # 3️⃣ Upload project files to subdomain folder (exclude node_modules)
-      - name: Deploy Project Root to Subdomain
+      # 3️⃣ Upload project files to subdomain folder (exclude .git)
+      - name: Deploy Static Files to Subdomain
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.CPANEL_HOST }}
@@ -34,13 +35,15 @@ jobs:
           key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
           port: ${{ secrets.CPANEL_PORT }}
           source: "."
-          target: "/home/sksdeve1/contact.sksdevelopers.lk "
+          target: "/home/sksdeve1/contact.sksdevelopers.lk"
           strip_components: 0
           exclude: |
             .git/
+            .github/
+            node_modules/
 
-      # 4️⃣ Restart Node.js app by touching tmp/restart.txt
-      - name: Restart Node.js App
+      # 4️⃣ Set proper file permissions
+      - name: Set File Permissions
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CPANEL_HOST }}
@@ -49,11 +52,11 @@ jobs:
           port: ${{ secrets.CPANEL_PORT }}
           script: |
             cd /home/sksdeve1/contact.sksdevelopers.lk
-            mkdir -p tmp
-            touch tmp/restart.txt
+            find . -type f -exec chmod 644 {} \;
+            find . -type d -exec chmod 755 {} \;
 
-      # 5️⃣ Health check
-      - name: Health Check
+      # 5️⃣ Health check - Verify deployment
+      - name: Verify Deployment
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CPANEL_HOST }}
@@ -61,16 +64,11 @@ jobs:
           key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
           port: ${{ secrets.CPANEL_PORT }}
           script: |
-            set -e
-            retries=5
-            count=0
-            until curl -f http://contact.sksdevelopers.lk:${{ secrets.BACKEND_PORT }}; do
-              count=$((count+1))
-              if [ $count -ge $retries ]; then
-                echo "Health check failed after $retries attempts."
-                exit 1
-              fi
-              echo "Retrying health check ($count/$retries)..."
-              sleep 5
-            done
-             
+            cd /home/sksdeve1/contact.sksdevelopers.lk
+            if [ ! -f "index.html" ]; then
+              echo "Error: index.html not found!"
+              exit 1
+            fi
+            echo "Deployment verified successfully!"
+            echo "Files deployed:"
+            ls -lh
