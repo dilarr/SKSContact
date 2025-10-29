@@ -72,3 +72,4 @@ jobs:
             echo "Deployment verified successfully!"
             echo "Files deployed:"
             ls -lh
+            
