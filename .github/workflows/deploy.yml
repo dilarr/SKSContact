@@ -10,21 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Setup SSH agent
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.8.1
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
 
-      # Step 3: Deploy files to subdomain
       - name: Deploy to Subdomain
         run: |
-          # Optional: remove old files (be careful!)
           ssh -p ${{ secrets.CPANEL_PORT }} -o StrictHostKeyChecking=no ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} "rm -rf /home/${{ secrets.CPANEL_USERNAME }}/contact.sksdevelopers.lk/*"
-
-          # Copy all repository files to subdomain folder
           scp -P ${{ secrets.CPANEL_PORT }} -r ./* ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }}:/home/${{ secrets.CPANEL_USERNAME }}/contact.sksdevelopers.lk/
