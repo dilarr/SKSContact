@@ -1,74 +1,30 @@
-name: Static Site Auto Deploy to cPanel
+name: Deploy to Contact Subdomain
 
 on:
   push:
     branches:
-      - main
+      - main  # Deploy from this branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout Repository
+      # Step 1: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Clean subdomain folder before deployment
-      - name: Clean Subdomain Folder
-        uses: appleboy/ssh-action@v1
+      # Step 2: Setup SSH agent
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
         with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          script: |
-            rm -rf /home/sksdeve1/contact.sksdevelopers.lk/*
-            mkdir -p /home/sksdeve1/contact.sksdevelopers.lk
+          ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
 
-      # 3️⃣ Upload project files to subdomain folder (exclude .git)
-      - name: Deploy Static Files to Subdomain
-        uses: appleboy/scp-action@v0.1.5
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          source: "."
-          target: "/home/sksdeve1/contact.sksdevelopers.lk"
-          strip_components: 0
-          exclude: |
-            .git/
-            .github/
-            node_modules/
+      # Step 3: Deploy files to subdomain
+      - name: Deploy to Subdomain
+        run: |
+          # Optional: remove old files (be careful!)
+          ssh -p ${{ secrets.CPANEL_PORT }} -o StrictHostKeyChecking=no ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} "rm -rf /home/${{ secrets.CPANEL_USERNAME }}/contact.sksdevelopers.lk/*"
 
-      # 4️⃣ Set proper file permissions
-      - name: Set File Permissions
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          script: |
-            cd /home/sksdeve1/contact.sksdevelopers.lk
-            find . -type f -exec chmod 644 {} \;
-            find . -type d -exec chmod 755 {} \;
-
-      # 5️⃣ Health check - Verify deployment
-      - name: Verify Deployment
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.CPANEL_PORT }}
-          script: |
-            cd /home/sksdeve1/contact.sksdevelopers.lk
-            if [ ! -f "index.html" ]; then
-              echo "Error: index.html not found!"
-              exit 1
-            fi
-            echo "Deployment verified successfully!"
-            echo "Files deployed:"
-            ls -lh
+          # Copy all repository files to subdomain folder
+          scp -P ${{ secrets.CPANEL_PORT }} -r ./* ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }}:/home/${{ secrets.CPANEL_USERNAME }}/contact.sksdevelopers.lk/
