@@ -10,49 +10,6 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-
-
-    /* Logo Styles */
-    .logo {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: var(--white);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      position: relative;
-      padding: 0.5rem;
-    }
-
-    .logo span {
-      color: var(--primary);
-    }
-
-    .logo::after {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: var(--primary);
-      bottom: 0;
-      right: 0;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-      100% {
-        transform: scale(1);
-      }
-    }
-
     :root {
       --primary: #f9b208;
       --primary-dark: #d99a06;
@@ -83,21 +40,6 @@
     }
     
     /* Hero Section */
-    /* Loader HTML */
-    .loader-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: var(--secondary);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.8s, visibility 0.8s;
-    }
     .hero {
       position: relative;
       background: linear-gradient(135deg, var(--secondary) 0%, #2d2d2d 100%);
@@ -491,6 +433,124 @@
     .social-youtube { background: linear-gradient(135deg, #FF0000 0%, #cc0000 100%); }
     .social-web { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
     
+    /* Latest Work Section */
+    .latest-work-section {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 48px 36px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--gray-200);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    .work-description p {
+      font-size: 18px;
+      color: var(--gray-600);
+      max-width: 600px;
+      margin: 0 auto 30px;
+      line-height: 1.7;
+    }
+    
+    .work-actions {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .work-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 32px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+      min-width: 200px;
+      justify-content: center;
+    }
+    
+    .work-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      transform: scale(0);
+      transition: transform 0.4s ease;
+    }
+    
+    .work-btn:hover::before {
+      transform: scale(1);
+    }
+    
+    .work-btn:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    }
+    
+    .work-btn i {
+      font-size: 22px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .work-btn span {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .work-btn:first-child {
+      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+      color: white;
+    }
+    
+    .work-btn:first-child i {
+      font-size: 24px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    
+    .work-btn.share-btn {
+      background: linear-gradient(135deg, #f9b208 0%, #ff6b35 100%);
+      color: white;
+    }
+    
+    .drive-btn {
+      background: linear-gradient(135deg, #4285F4 0%, #34A853 100%) !important;
+      color: white;
+      border: 2px solid #fff;
+      box-shadow: 0 4px 20px rgba(66, 133, 244, 0.4) !important;
+    }
+    
+    .drive-btn:hover {
+      box-shadow: 0 12px 32px rgba(66, 133, 244, 0.6) !important;
+      transform: translateY(-6px) scale(1.03);
+    }
+    
+    .drive-btn i {
+      font-size: 24px;
+      animation: pulse 2s infinite;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+    }
+    
     /* Copy Button */
     .copy-section {
       text-align: center;
@@ -576,17 +636,10 @@
       }
     }
     
-    @keyframes slideUpFade {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .toast i {
+      font-size: 24px;
     }
-
+    
     /* Responsive Design */
     @media (max-width: 768px) {
       .hero {
@@ -637,6 +690,16 @@
         font-size: 28px;
       }
       
+      .work-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .work-btn {
+        width: 100%;
+        max-width: 280px;
+      }
+      
       .toast {
         bottom: 20px;
         right: 20px;
@@ -656,6 +719,14 @@
       .copy-btn {
         width: 100%;
         justify-content: center;
+      }
+      
+      .latest-work-section {
+        padding: 32px 20px;
+      }
+      
+      .work-description p {
+        font-size: 16px;
       }
     }
 
@@ -791,117 +862,6 @@
   </style>
 </head>
 <body>
-  <!-- Modern Loader -->
-  <div class="loader-wrapper">
-    <div class="loader-content">
-      <div class="loader-brand">
-        <div class="loader-brand-text">SKS<span>Developers</span></div>
-      </div>
-      <div class="loader-progress"></div>
-    </div>
-  </div>
-
-  <style>
-    /* Modern Loader Styles */
-    .loader-wrapper {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: var(--secondary);
-      z-index: 99999;
-      transition: all 0.18s ease-out;
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .loader-hidden .loader-wrapper {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .loader-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .loader-brand {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .loader-brand-text {
-      font-size: 3rem;
-      font-weight: 800;
-      color: var(--white);
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideUpFade 0.18s ease-out forwards, pulse 2s infinite 1s;
-    }
-
-    .loader-brand-text span {
-      color: var(--primary);
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideUpFade 0.18s ease-out forwards 0.05s, pulse 2s infinite 1.05s;
-    }
-
-    .loader-progress {
-      width: 200px;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .loader-progress::after {
-      content: '';
-      position: absolute;
-      left: -50%;
-      width: 50%;
-      height: 100%;
-      background: var(--primary);
-      animation: loading 1.5s linear infinite;
-    }
-
-    @keyframes loading {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(400%); }
-    }
-
-    @keyframes slideUpFade {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    body.loading {
-      overflow: hidden;
-    }
-    
-    body.loader-hidden {
-      overflow: auto;
-    }
-
-    body.loader-hidden .loader-wrapper {
-      display: none;
-    }
-  </style>
   <div class="hero">
     <div class="slideshow">
       <div class="slideshow-item active" style="background-image: url('./slideshow/33\ Living\ Room\ Designs\ Where\ Coastal\ Elegance\ Merges\ with\ Industrial\ Strength.jpeg')"></div>
@@ -972,7 +932,7 @@
         <span>Get Quote on WhatsApp</span>
       </a>
       
-      <a href="tel:+94775290170" class="action-btn btn-call" data-aos="zoom-in" data-aos-delay="200">
+      <a href="#" class="action-btn btn-call" onclick="handleCall(event)" data-aos="zoom-in" data-aos-delay="200">
         <i class="bi bi-telephone-fill"></i>
         <span>Call Now</span>
       </a>
@@ -1009,6 +969,24 @@
       </div>
     </div>
     
+    <!-- Latest Work Section -->
+    <div class="latest-work-section" data-aos="fade-up">
+      <h2 class="section-title">✨ Check Out Our Latest Work! ✨</h2>
+      <div class="work-description">
+        <p>We're excited to share what our team has been working on! 💪</p>
+        <div class="work-actions">
+          <a href="https://drive.google.com/drive/folders/1YOia5FOEtwvFkTvpVxK6sOlJaWGB_2-M?usp=sharing" target="_blank" class="work-btn drive-btn">
+            <i class="bi bi-google-drive"></i>
+            <span>View Our Projects</span>
+          </a>
+          <a href="#" class="work-btn share-btn" onclick="shareWork(event)">
+            <i class="bi bi-share-fill"></i>
+            <span>Share Our Work</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    
     <div class="copy-section" data-aos="fade-up">
       <button class="copy-btn" onclick="copyContact()">
         <i class="bi bi-clipboard-check-fill"></i>
@@ -1022,56 +1000,11 @@
     <span>Contact details copied to clipboard!</span>
   </div>
 
-  <footer class="footer">
-    <div class="footer-container">
-     
-
-    <div class="footer-bottom">
-      <p>&copy; <span id="currentYear"></span> SKS Developers. All rights reserved. development by <a href="https://techspire.lk/" style="color: var(--gray-900); font-weight: 700; text-decoration: none;">Techspire Solutions (PVT) LTD</a></p>
-    </div>
-  </footer>
+  <div style="text-align: center; padding: 20px; color: var(--gray-600); font-size: 14px; margin-top: 40px;">
+    <p>&copy; <span id="currentYear"></span> SKS Developers. All rights reserved. Development by <a href="https://techspire.lk/" style="color: var(--gray-900); font-weight: 700; text-decoration: none;">Techspire Solutions (PVT) LTD</a></p>
+  </div>
 
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script>
-    // Loader functionality: show loader immediately, then hide quickly on window load
-    (function() {
-      // Ensure body doesn't scroll while loader is visible
-      try { document.body.style.overflow = 'hidden'; } catch (e) {}
-
-      const hideLoader = () => {
-        const loader = document.querySelector('.loader-wrapper');
-        if (!loader) {
-          // nothing to do
-          try { document.body.style.overflow = 'auto'; } catch (e) {}
-          return;
-        }
-
-          // fade out smoothly and remove
-          loader.style.transition = 'opacity 0.3s ease, visibility 0.3s ease';
-          loader.style.opacity = '0';
-          loader.style.visibility = 'hidden';
-
-          // restore scrolling immediately so page becomes interactive
-          try { document.body.style.overflow = 'auto'; } catch (e) {}
-
-          // remove element from DOM after transition to avoid blocking
-          setTimeout(() => {
-            if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
-          }, 300);
-      };
-
-      // If load already happened, hide immediately. Otherwise hide on load.
-      if (document.readyState === 'complete') {
-        // Set loader display time to 1 second for already loaded pages
-        setTimeout(hideLoader, 1000);
-      } else {
-        window.addEventListener('load', () => {
-          // Set loader display time to 1 second for loading pages
-          setTimeout(hideLoader, 1000);
-        }, {once: true});
-      }
-    })();
-  </script>
   <script>
     // Initialize AOS animations
     AOS.init({
@@ -1122,6 +1055,37 @@ LinkedIn: https://www.linkedin.com/company/109066903/`;
           toast.classList.remove('show');
         }, 3000);
       });
+    }
+    
+    function shareWork(event) {
+      // Prevent default anchor behavior which causes scrolling
+      event.preventDefault();
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'SKS Developers - Our Latest Work',
+          text: 'Check out the amazing work done by SKS Developers!',
+          url: 'https://drive.google.com/drive/folders/1YOia5FOEtwvFkTvpVxK6sOlJaWGB_2-M?usp=sharing'
+        }).catch(console.error);
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        alert('You can share this page by copying the URL from your browser\'s address bar.');
+      }
+    }
+    
+    function handleCall(event) {
+      event.preventDefault();
+      
+      // Check if user is on a mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // On mobile, try to initiate a call
+        window.location.href = 'tel:+94775290170';
+      } else {
+        // On desktop, show instructions
+        alert('To call us, please:\n\n1. Copy this number: +94 77 529 0170\n2. Use your phone\'s dialer to call this number directly\n\nAlternatively, you can WhatsApp us using the "Get Quote on WhatsApp" button.');
+      }
     }
   </script>
 </body>
